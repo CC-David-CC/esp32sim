@@ -1,0 +1,28 @@
+ESP32 Firmware Lab
+
+The emulator and its browser workbench come from esp32sim by mikroverk and
+contributors under the MIT License.
+https://github.com/mikroverk/esp32sim/tree/3f49dad86878afca429508a7a8b2e8f0bf38ea6e
+https://github.com/CC-David-CC/esp32sim/tree/webos/browser-files/webos
+
+The lab starts the upstream LilyGO TTGO T-Display preset. Its filesystem
+image and ST7789 driver at examples/ttgo-tdisplay are MIT-licensed. The
+stock MicroPython ESP32_GENERIC v1.29.0 combined firmware is the original
+distribution from micropython.org. See tdisplay-NOTICE.txt for details.
+https://github.com/mikroverk/esp32sim/tree/3f49dad86878afca429508a7a8b2e8f0bf38ea6e/examples/ttgo-tdisplay
+https://micropython.org/download/ESP32_GENERIC/
+https://github.com/micropython/micropython/tree/v1.29.0
+https://github.com/espressif/esp-idf/tree/v5.5.2
+
+Espressif publishes the unmodified ESP32 rev 3.0 mask-ROM ELF distributed
+here under Apache 2.0. Copyright (c) 2015-2022 Espressif Systems
+(Shanghai) Co. Ltd. See the release and the ROM third-party notices.
+https://github.com/espressif/esp-rom-elfs/releases/tag/20260528
+https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32/COPYRIGHT.html#rom-source-code-copyrights
+
+The included xterm.js runtime is MIT-licensed. dpkt-js is included from
+the pinned esp32sim checkout with its original license.
+
+The emulator WebAssembly includes Rust 1.99.1 runtime code. See the Rust
+MIT and Apache 2.0 license texts and the corresponding library sources.
+https://github.com/rust-lang/rust/tree/58cf8f9c35b355199727627d07ae34a4e2846d67/library
