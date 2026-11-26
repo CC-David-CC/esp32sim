@@ -9,29 +9,35 @@
     const job = pending;
     pending = null;
     clearTimeout(job.timer);
+    clearInterval(job.promptRetry);
     if (error) job.reject(error);
     else job.resolve();
   }
 
-  function timeout() {
-    return setTimeout(() => finish(Error('MicroPython did not return a UART0 prompt.')), 20000);
+  function timeout(delay) {
+    return setTimeout(() => finish(Error('MicroPython did not return a UART0 prompt.')), delay);
+  }
+
+  function requestPrompt() {
+    if (pending?.next !== 0 || boardName !== 'ttgo-tdisplay' ||
+        $('#status').textContent !== 'running in WebAssembly') return;
+    send({t: 'key', src: 'uart0', data: '\x03'});
   }
 
   window.addEventListener('esp32lab-uart', () => {
     if (!pending || addSerial.buf.uart0 !== '>>> ') return;
+    clearInterval(pending.promptRetry);
     clearTimeout(pending.timer);
     const line = pending.commands[pending.next++];
     send({t: 'serial', src: 'uart0', line});
     if (pending.next === pending.commands.length) finish();
-    else pending.timer = timeout();
+    else pending.timer = timeout(20000);
   });
   window.addEventListener('pagehide', () => finish(Error('The emulator restarted.')), {once: true});
 
   lab.connect(source => {
     if (pending) throw Error('Wait for the console to respond.');
-    if (boardName !== 'ttgo-tdisplay' || $('#status').textContent !== 'running in WebAssembly') {
-      throw Error('Wait for the T-Display to boot before running Python.');
-    }
+    if (boardName && boardName !== 'ttgo-tdisplay') throw Error('Select the T-Display preset to run Python.');
     const bytes = new TextEncoder().encode(source);
     const commands = ['import ubinascii as _webos_b64; _webos_program = bytearray()'];
     for (let offset = 0; offset < bytes.length; offset += 96) {
@@ -41,8 +47,8 @@
     commands.push('exec(_webos_program.decode())');
     document.querySelector('.chiptab[data-src="uart0"]').click();
     return new Promise((resolve, reject) => {
-      pending = {timer: timeout(), commands, next: 0, resolve, reject};
-      send({t: 'key', src: 'uart0', data: '\x03'});
+      pending = {timer: timeout(45000), promptRetry: setInterval(requestPrompt, 2500), commands, next: 0, resolve, reject};
+      requestPrompt();
     });
   });
 })();

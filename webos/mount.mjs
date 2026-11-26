@@ -117,7 +117,10 @@ export function mount(host) {
         });
         if (selected == null) return;
         let name = validName(selected.trim());
-        if (!fileType(name)) name += '.esp32lab.json';
+        if (!fileType(name)) {
+          if (name.includes('.')) throw Error('Use an .esp32lab.json or .py filename.');
+          name += '.esp32lab.json';
+        }
         const parent = filesPath(folder, true);
         path = filesPath(parent ? parent + '/' + name : name);
       }
@@ -150,7 +153,7 @@ export function mount(host) {
       return;
     }
     running = true;
-    tell('Sending the program to UART0…');
+    tell('Waiting for the MicroPython UART0 prompt…');
     try {
       await runPython(program);
       tell('Program sent to UART0.');
@@ -168,8 +171,20 @@ export function mount(host) {
     tell('New MicroPython program.');
   });
 
+  function showConsole() {
+    const simulator = frame.contentDocument;
+    const console = simulator?.querySelector('#console');
+    if (!console) {
+      tell('Wait for the T-Display to start.');
+      return;
+    }
+    simulator.querySelector('.chiptab[data-src="uart0"]')?.click();
+    console.scrollIntoView({block: 'end'});
+    console.scrollTop = console.scrollHeight;
+  }
+
   toolbar.append(textButton('New', newProgram), textButton('Open', chooseFile), textButton('Save', save(false)),
-    textButton('Save As', save(true)), textButton('Run Python', run));
+    textButton('Save As', save(true)), textButton('Run Python', run), textButton('UART console', showConsole));
   panel.append(toolbar, source, note, legal);
   section.append(panel, frame);
   const ready = (async () => {
